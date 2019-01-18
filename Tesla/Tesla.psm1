@@ -1955,10 +1955,19 @@ function Invoke-TeslaVehicleWakeUp {
     } #BEGIN
 
     PROCESS {
+        
+        if ($Token.psobject.Properties.Name -contains "access_token") {
+            $Token = $Token.access_token
+        }
+    
+        $Headers =  @{
+            "Authorization" = "Bearer $Token"
+            "Accept-Encoding" = "gzip,deflate"
+        }
 
-        Write-Verbose "Executing 'wake_up'"
-        Invoke-TeslaVehicleCommand -Vehicle $Vehicle -Token $Token -Command wake_up
-          
+        Write-Verbose "Executing wake_up"
+        $TeslaCommand = Invoke-RestMethod -Uri "$ApiUri/vehicles/$($Vehicle.Id)/wake_up" -Method Post -Headers $Headers -ContentType 'application/json'| Select-Object -ExpandProperty Response
+                
     } #PROCESS
 
     END {
